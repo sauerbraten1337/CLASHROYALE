@@ -269,6 +269,13 @@ export function resolveHit(
     for (const other of sim.entitiesInRadius(target.x, target.y, radius, target.team)) {
       if (other.id === target.id) continue;
       sim.dealDamage(other, damage * fraction, attacker, {});
+      for (const status of chain.applies ?? []) {
+        other.applyStatus(status.kind, status.duration, status.magnitude, attacker.id);
+      }
+    }
+    // The primary target takes the rider too.
+    for (const status of chain.applies ?? []) {
+      target.applyStatus(status.kind, status.duration, status.magnitude, attacker.id);
     }
   }
 }

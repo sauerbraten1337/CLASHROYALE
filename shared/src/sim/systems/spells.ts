@@ -6,7 +6,15 @@
  * `PendingSpell` entries and resolved by `updatePendingSpells`.
  */
 
-import { FxKind, StatusKind, opposingTeam, type CardDef, type EntityId, type PlayerId, type Team } from '../../types.js';
+import {
+  FxKind,
+  StatusKind,
+  opposingTeam,
+  type CardDef,
+  type EntityId,
+  type PlayerId,
+  type Team,
+} from '../../types.js';
 import type { PlayerRuntime, Simulation } from '../Simulation.js';
 import { displace } from './movement.js';
 
@@ -31,6 +39,11 @@ export interface PendingSpell {
   cardId: string;
   /** Full card definition, for spells that do more than damage. */
   card?: CardDef;
+  /**
+   * Statuses applied to enemies caught in the impact. Used by delayed
+   * ability effects, which have no card spell spec to read them from.
+   */
+  applies?: Array<{ kind: StatusKind; duration: number; magnitude: number }>;
 }
 
 export function updatePendingSpells(sim: Simulation, dt: number): void {
@@ -61,12 +74,17 @@ function resolveImpact(sim: Simulation, pending: PendingSpell): void {
   const spec = pending.card?.spell;
   const buildingFactor = spec?.buildingDamageFactor ?? 0.4;
 
-  if (pending.damage > 0) {
+  if (pending.damage > 0 || pending.applies) {
     for (const enemy of sim.entitiesInRadius(pending.x, pending.y, pending.radius, enemyTeam)) {
       // Spells hit structures for a reduced fraction, so no deck can simply
       // burn towers down from hand.
-      const damage = enemy.isStructure ? pending.damage * buildingFactor : pending.damage;
-      sim.dealDamage(enemy, damage, source, { isSpell: true });
+      if (pending.damage > 0) {
+        const damage = enemy.isStructure ? pending.damage * buildingFactor : pending.damage;
+        sim.dealDamage(enemy, damage, source, { isSpell: true });
+      }
+      for (const status of pending.applies ?? []) {
+        enemy.applyStatus(status.kind, status.duration, status.magnitude, source?.id);
+      }
     }
   }
 

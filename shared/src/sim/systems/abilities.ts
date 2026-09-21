@@ -287,6 +287,7 @@ export function runDeathEffects(sim: Simulation, entity: SimEntity, _killer: Sim
           impactsLeft: 1,
           interval: 0,
           cardId: entity.card.id,
+          ...(spec.applies ? { applies: spec.applies } : {}),
         });
         sim.addFx({
           kind: FxKind.Phase,

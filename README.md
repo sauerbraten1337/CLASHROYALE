@@ -115,7 +115,7 @@ renders smoothly at 60 fps without sending 30 updates a second.
 ## Testing
 
 ```bash
-npm test              # engine, bot and balance tests (52)
+npm test              # engine, bot and balance tests (59)
 npm run test:server   # server integration over real websockets (17)
 npm run test:browser  # single-browser smoke test in Chromium (33)
 npm run test:online   # two browsers playing each other end to end (23)

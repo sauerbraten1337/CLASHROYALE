@@ -21,7 +21,7 @@ import {
   getCard,
   towerLayout,
 } from '../index.js';
-import { CardType, EntityKind, type CardDef } from '../types.js';
+import { CardType, EntityKind, StatusKind, type CardDef } from '../types.js';
 
 function arena(): Simulation {
   return new Simulation({
@@ -241,6 +241,106 @@ describe('card cost curve', () => {
         );
       }
     }
+  });
+});
+
+describe('status effects in play', () => {
+  /**
+   * The data test in simulation.test.ts proves every status is *declared* on
+   * some card. This proves the engine actually applies them, which is a
+   * different claim: a status can be attached to a card and still never
+   * reach an entity if the ability path that carries it is not wired up.
+   */
+  function statusesSeen(run: (sim: Simulation) => void, seconds: number): Set<StatusKind> {
+    const sim = arena();
+    run(sim);
+    const seen = new Set<StatusKind>();
+    const steps = Math.round(seconds / TICK_SECONDS);
+    for (let i = 0; i < steps; i++) {
+      sim.step(TICK_SECONDS);
+      for (const entity of sim.entities.values()) {
+        for (const status of entity.statuses) seen.add(status.kind);
+      }
+    }
+    return seen;
+  }
+
+  it('applies burning from chained plasma', () => {
+    const seen = statusesSeen((sim) => {
+      const bloom = getCard('plasma-bloom');
+      const hound = getCard('shard-hound');
+      assert.ok(bloom && hound);
+      sim.spawnUnits(bloom, Team.Blue, 'blue', 50, 100, { instant: true });
+      sim.spawnUnits(hound, Team.Red, 'red', 50, 88, { instant: true });
+    }, 20);
+    assert.ok(seen.has(StatusKind.Burning), 'plasma should set its targets alight');
+  });
+
+  it('applies shocked from a thunder strike', () => {
+    const seen = statusesSeen((sim) => {
+      const seed = getCard('thunder-seed');
+      const tank = getCard('bastion-shell');
+      assert.ok(seed && tank);
+      // Both in the left lane, so the target does not path out of the blast.
+      const seeds = sim.spawnUnits(seed, Team.Blue, 'blue', 24, 100, { instant: true });
+      sim.spawnUnits(tank, Team.Red, 'red', 24, 98, { instant: true });
+      const body = seeds[0];
+      assert.ok(body);
+      sim.killEntity(body, null);
+    }, 6);
+    assert.ok(seen.has(StatusKind.Shocked), 'the death strike should leave survivors shocked');
+  });
+
+  it('applies frozen and slowed from Time Fracture', () => {
+    const seen = statusesSeen((sim) => {
+      const tank = getCard('bastion-shell');
+      assert.ok(tank);
+      sim.spawnUnits(tank, Team.Red, 'red', 50, 88, { instant: true });
+      const player = sim.getPlayer(Team.Blue);
+      assert.ok(player);
+      player.energy = 10;
+      player.hand[0] = 'time-fracture';
+      sim.playCard('blue', 0, 50, 88);
+    }, 3);
+    assert.ok(seen.has(StatusKind.Frozen), 'Time Fracture should stop its targets dead');
+    assert.ok(seen.has(StatusKind.Slowed), 'Time Fracture should then slow them');
+  });
+
+  it('applies silenced and marked from Void Pulse', () => {
+    const seen = statusesSeen((sim) => {
+      const tank = getCard('bastion-shell');
+      assert.ok(tank);
+      sim.spawnUnits(tank, Team.Red, 'red', 50, 88, { instant: true });
+      const player = sim.getPlayer(Team.Blue);
+      assert.ok(player);
+      player.energy = 10;
+      player.hand[0] = 'void-pulse';
+      sim.playCard('blue', 0, 50, 88);
+    }, 3);
+    assert.ok(seen.has(StatusKind.Silenced), 'Void Pulse should silence');
+    assert.ok(seen.has(StatusKind.Marked), 'Void Pulse should mark');
+  });
+
+  it('applies the carrier statuses: shield, haste, cloak and poison', () => {
+    const seen = statusesSeen((sim) => {
+      for (const [id, x] of [
+        ['void-architect', 40],
+        ['aegis-drummer', 42],
+        ['null-stalker', 44],
+        ['venom-spore', 46],
+      ] as Array<[string, number]>) {
+        const card = getCard(id);
+        assert.ok(card, id);
+        sim.spawnUnits(card, Team.Blue, 'blue', x, 105, { instant: true });
+      }
+      const tank = getCard('bastion-shell');
+      assert.ok(tank);
+      sim.spawnUnits(tank, Team.Red, 'red', 46, 96, { instant: true });
+    }, 20);
+    assert.ok(seen.has(StatusKind.Shielded), 'the architect should shield');
+    assert.ok(seen.has(StatusKind.Hasted), 'the drummer should haste');
+    assert.ok(seen.has(StatusKind.Invisible), 'the stalker should cloak');
+    assert.ok(seen.has(StatusKind.Poisoned), 'the spore should poison');
   });
 });
 

@@ -160,6 +160,14 @@ export interface AbilitySpec {
   spawns?: string;
   /** How many to spawn. */
   spawnCount?: number;
+  /**
+   * Statuses this ability puts on the enemies it affects.
+   *
+   * Keeping this on the generic spec rather than inventing an ability kind
+   * per status means a designer can attach any status to any ability without
+   * the engine growing another branch.
+   */
+  applies?: Array<{ kind: StatusKind; duration: number; magnitude: number }>;
 }
 
 /** What a spell does where it lands. */

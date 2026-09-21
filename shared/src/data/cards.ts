@@ -416,7 +416,14 @@ export const CARDS: CardDef[] = [
     range: 1.6,
     radius: 2,
     abilities: [
-      { kind: AbilityKind.DeathCharge, duration: 2, value: 330, radius: 9 },
+      {
+        kind: AbilityKind.DeathCharge,
+        duration: 2,
+        value: 330,
+        radius: 9,
+        // Survivors of the strike are left reeling.
+        applies: [{ kind: StatusKind.Shocked, duration: 3, magnitude: 1 }],
+      },
     ],
     artwork: 'seed',
     sound: 'seed',
@@ -437,7 +444,14 @@ export const CARDS: CardDef[] = [
     range: 22,
     projectileSpeed: 26,
     lifetime: 34,
-    abilities: [{ kind: AbilityKind.ChainSplash, radius: 8, value: 0.45 }],
+    abilities: [
+      {
+        kind: AbilityKind.ChainSplash,
+        radius: 8,
+        value: 0.45,
+        applies: [{ kind: StatusKind.Burning, duration: 3, magnitude: 26 }],
+      },
+    ],
     artwork: 'plasma-bloom',
     sound: 'plasma',
   },
@@ -683,7 +697,8 @@ export const CARDS: CardDef[] = [
     ...spellBase,
     id: 'time-fracture',
     name: 'Time Fracture',
-    description: 'Splinters the local flow of time, slowing every enemy in the zone to a crawl.',
+    description:
+      'Splinters the local flow of time. Everything caught in it stops dead for a moment, then crawls.',
     rarity: Rarity.Common,
     cost: 2,
     faction: Faction.Chrono,
@@ -692,7 +707,11 @@ export const CARDS: CardDef[] = [
       radius: 14,
       damage: 55,
       buildingDamageFactor: 0.3,
-      applies: [{ kind: StatusKind.Slowed, duration: 4, magnitude: 0.55 }],
+      applies: [
+        // A brief hard stop, then a long slow as time re-knits.
+        { kind: StatusKind.Frozen, duration: 0.7, magnitude: 1 },
+        { kind: StatusKind.Slowed, duration: 3.5, magnitude: 0.55 },
+      ],
     },
     artwork: 'time-fracture',
     sound: 'fracture',
@@ -720,7 +739,7 @@ export const CARDS: CardDef[] = [
     id: 'void-pulse',
     name: 'Void Pulse',
     description:
-      'Strips shields, hastes and every other blessing from the enemies it washes over, and silences them briefly.',
+      'Strips every blessing from the enemies it washes over, silences them, and marks them to take more damage.',
     rarity: Rarity.Rare,
     cost: 2,
     faction: Faction.Rift,
@@ -730,7 +749,11 @@ export const CARDS: CardDef[] = [
       damage: 70,
       buildingDamageFactor: 0.25,
       dispel: true,
-      applies: [{ kind: StatusKind.Silenced, duration: 3, magnitude: 1 }],
+      applies: [
+        { kind: StatusKind.Silenced, duration: 3, magnitude: 1 },
+        // Marked bodies take more damage from everything.
+        { kind: StatusKind.Marked, duration: 5, magnitude: 0.25 },
+      ],
     },
     artwork: 'void-pulse',
     sound: 'pulse',

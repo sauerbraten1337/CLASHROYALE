@@ -61,9 +61,9 @@ a tower down from hand.
 
 | Card | Cost | Radius | Damage | vs structures | Effect |
 | --- | ---: | ---: | ---: | ---: | --- |
-| Time Fracture | 2 | 14 | 55 | 30% | slowed 4s |
+| Time Fracture | 2 | 14 | 55 | 30% | frozen 0.7s, slowed 3.5s |
 | Energy Surge | 2 | 0 | - | - | 3x energy for 7s |
-| Void Pulse | 2 | 13 | 70 | 25% | dispels buffs, silenced 3s |
+| Void Pulse | 2 | 13 | 70 | 25% | dispels buffs, silenced 3s, marked 5s |
 | Rift Blast | 3 | 12 | 285 | 35% | knockback 6 |
 | Bloom Mend | 3 | 14 | - | - | heals 340, ally shielded 5s |
 | Meteor Shard | 4 | 11 | 165 | 45% | 3 impacts, 1.1s delay |

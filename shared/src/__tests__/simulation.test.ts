@@ -30,7 +30,7 @@ import {
   validateDeck,
   type SimulationConfig,
 } from '../index.js';
-import { EntityKind, CardType } from '../types.js';
+import { AbilityKind, CardType, EntityKind, StatusKind } from '../types.js';
 
 function makeSim(overrides: Partial<SimulationConfig> = {}): Simulation {
   return new Simulation({
@@ -91,6 +91,49 @@ describe('card data', () => {
         assert.ok((card.movementSpeed ?? 0) > 0, `${card.id} cannot move`);
       }
     }
+  });
+
+  it('makes every declared status effect reachable in play', () => {
+    // A status the engine implements but no card can ever apply is dead
+    // code masquerading as a feature. This is the guard against that.
+    const reachable = new Set<StatusKind>();
+
+    for (const card of CARDS) {
+      for (const s of card.spell?.applies ?? []) reachable.add(s.kind);
+      for (const s of card.spell?.appliesToAllies ?? []) reachable.add(s.kind);
+      for (const ability of card.abilities ?? []) {
+        for (const s of ability.applies ?? []) reachable.add(s.kind);
+        // Abilities whose status is implied by the ability kind itself.
+        switch (ability.kind) {
+          case AbilityKind.ChillTouch:
+            reachable.add(StatusKind.Slowed);
+            break;
+          case AbilityKind.VenomTouch:
+            reachable.add(StatusKind.Poisoned);
+            break;
+          case AbilityKind.Barrier:
+            reachable.add(StatusKind.Shielded);
+            break;
+          case AbilityKind.Cloak:
+            reachable.add(StatusKind.Invisible);
+            break;
+          case AbilityKind.RallyAura:
+            reachable.add(StatusKind.Hasted);
+            break;
+          default:
+            break;
+        }
+      }
+    }
+
+    const missing = Object.values(StatusKind).filter((kind) => !reachable.has(kind));
+    assert.deepEqual(missing, [], `no card applies: ${missing.join(', ')}`);
+  });
+
+  it('keeps every declared ability attached to at least one card', () => {
+    const used = new Set(CARDS.flatMap((c) => (c.abilities ?? []).map((a) => a.kind)));
+    const missing = Object.values(AbilityKind).filter((kind) => !used.has(kind));
+    assert.deepEqual(missing, [], `no card uses: ${missing.join(', ')}`);
   });
 
   it('keeps the starter deck legal', () => {

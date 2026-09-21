@@ -136,6 +136,15 @@ export function App(): JSX.Element {
           setScreen('battle');
           break;
 
+        case ServerMessageType.Welcome:
+          // The server is holding a match slot open for us: reclaim it rather
+          // than stranding the opponent. This is what makes a mid-match
+          // refresh or a dropped connection recoverable.
+          if (message.resumableMatchId) {
+            connection.reconnectToMatch(message.resumableMatchId);
+          }
+          break;
+
         case ServerMessageType.PrivateRoom:
           setRoomCode(message.code);
           setRoomError(null);

@@ -178,6 +178,27 @@ async function main() {
   check('both clients agree on the entity count', aliceLate === bobLate, `alice=${aliceLate} bob=${bobLate}`);
   check('units from both sides are on the board', aliceLate > 6, `${aliceLate} entities`);
 
+  console.log('\n--- Alice reloads mid-match and reclaims her slot ---');
+  // A refresh drops the socket. The server holds the slot open, and the
+  // client should rejoin the same match rather than stranding Bob.
+  await alice.page.reload({ waitUntil: 'networkidle' });
+  await alice.page.waitForSelector('.battle__canvas', { timeout: 20000 });
+  check('Alice lands back in the arena after a reload', true);
+
+  await alice.page.waitForTimeout(1500);
+  await alice.page.keyboard.press('F1');
+  await alice.page.waitForSelector('.debug', { timeout: 5000 });
+  const reconnected = await alice.page.textContent('.debug');
+  check('Alice is receiving snapshots again', readDebug(reconnected, 'tick') > 0);
+
+  const rejoinedEnemy = await alice.page.locator('.hud__name').first().textContent();
+  check('Alice is still matched against Bob', rejoinedEnemy?.includes('Bob'), `saw "${rejoinedEnemy}"`);
+
+  // Both clients must agree again after the rejoin.
+  const aliceRe = readDebug(await alice.page.textContent('.debug'), 'entities');
+  const bobRe = readDebug(await bob.page.textContent('.debug'), 'entities');
+  check('both clients agree after the reconnect', aliceRe === bobRe, `alice=${aliceRe} bob=${bobRe}`);
+
   console.log('\n--- leaving an online match forfeits it ---');
   await bob.page.locator('.hud button').first().click();
   // Leaving the arena forfeits, so Alice should be shown a victory.

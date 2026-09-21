@@ -280,6 +280,23 @@ function handleMessage(connection: Connection, raw: string | Buffer): void {
         return;
       }
       match.connect(connection.playerId, (m) => send(connection.socket, m));
+
+      // Re-send the match details. A reconnecting client has lost the
+      // original MatchFound, so without this it would have a live socket to
+      // a match it cannot render: no team, no opponent, no arena to enter.
+      const slot = match.slots.get(connection.playerId);
+      const opponent = match.opponentOf(connection.playerId);
+      if (slot) {
+        send(connection.socket, {
+          type: ServerMessageType.MatchFound,
+          matchId: match.matchId,
+          team: slot.team,
+          opponentName: opponent?.name ?? 'Opponent',
+          opponentTrophies: 0,
+          // The match is already under way; drop straight in.
+          countdown: 0,
+        });
+      }
       break;
     }
 

@@ -118,7 +118,7 @@ renders smoothly at 60 fps without sending 30 updates a second.
 npm test              # engine, bot and balance tests (52)
 npm run test:server   # server integration over real websockets (17)
 npm run test:browser  # single-browser smoke test in Chromium (33)
-npm run test:online   # two browsers playing each other end to end (19)
+npm run test:online   # two browsers playing each other end to end (23)
 ```
 
 The browser tests are the ones that matter most: compiling is not evidence
@@ -126,9 +126,12 @@ that a game works. `test:online` opens two isolated browser contexts, queues
 them into a match with each other, plays cards, and asserts both clients agree
 on the authoritative state.
 
-Two real bugs were found this way and fixed: renaming yourself never reached
-the server, and leaving an online match did not concede it (the opponent was
-left fighting an absent player).
+Three real gaps were found this way and fixed: renaming yourself never reached
+the server, leaving an online match did not concede it (the opponent was left
+fighting an absent player), and reconnect was implemented on the server but
+never actually called by the client, so a mid-match refresh abandoned the
+game. `test:online` now reloads a player mid-match and asserts they reclaim
+their slot and re-sync with their opponent.
 
 ## Balance
 

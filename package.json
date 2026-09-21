@@ -15,8 +15,13 @@
     "dev:client": "npm run dev -w @riftbound/client",
     "dev": "npm run build:shared && concurrently -n server,client -c cyan,magenta \"npm run dev:server\" \"npm run dev:client\"",
     "typecheck": "npm run build:shared && npm run typecheck -w @riftbound/server && npm run typecheck -w @riftbound/client",
-    "test": "npm run build:shared && npm run test -w @riftbound/shared",
-    "start": "npm run start -w @riftbound/server"
+    "test": "npm run build:shared && node --test \"shared/dist/__tests__/*.test.js\"",
+    "start": "npm run start -w @riftbound/server",
+    "test:server": "npm run build:shared && npm run build -w @riftbound/server && node --test \"server/dist/__tests__/*.test.js\"",
+    "test:browser": "npm run build && node client/src/__tests__/smoke.mjs",
+    "test:online": "npm run build && node client/src/__tests__/online.mjs",
+    "test:all": "npm run test && npm run test:server && npm run test:browser && npm run test:online",
+    "balance": "npm run build:shared && node shared/dist/tools/balance-table.js"
   },
   "devDependencies": {
     "concurrently": "^9.1.0",

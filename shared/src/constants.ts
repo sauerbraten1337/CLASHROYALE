@@ -170,3 +170,17 @@ export const REWARD_DRAW = { xp: 16, coins: 20, trophies: 2 };
 export function xpForLevel(level: number): number {
   return Math.round(100 * Math.pow(1.35, level - 1));
 }
+
+/**
+ * Rewards for one side of a finished match.
+ *
+ * Defined here rather than in the server so that locally-decided practice
+ * matches and server-decided ranked matches pay out from one table.
+ */
+export function rewardsFor(
+  winner: Team | null,
+  team: Team,
+): { xp: number; coins: number; trophies: number } {
+  if (winner === null) return { ...REWARD_DRAW };
+  return winner === team ? { ...REWARD_WIN } : { ...REWARD_LOSS };
+}

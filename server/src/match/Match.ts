@@ -10,15 +10,12 @@
 import {
   MatchPhase,
   RECONNECT_GRACE_SECONDS,
-  REWARD_DRAW,
-  REWARD_LOSS,
-  REWARD_WIN,
   SNAPSHOT_INTERVAL_TICKS,
   ServerMessageType,
   Simulation,
   TICK_SECONDS,
   Team,
-  type MatchRewards,
+  rewardsFor,
   type MatchResult,
   type PlayerId,
   type ServerMessage,
@@ -207,7 +204,7 @@ export class Match {
       slot.send?.({
         type: ServerMessageType.MatchEnd,
         result,
-        rewards: rewardsFor(result, slot.team),
+        rewards: rewardsFor(result.winner, slot.team),
       });
     }
     this.onFinished(this);
@@ -239,10 +236,4 @@ export class Match {
     }
     return null;
   }
-}
-
-/** Rewards for one side, given a finished match. */
-export function rewardsFor(result: MatchResult, team: Team): MatchRewards {
-  if (result.winner === null) return { ...REWARD_DRAW };
-  return result.winner === team ? { ...REWARD_WIN } : { ...REWARD_LOSS };
 }

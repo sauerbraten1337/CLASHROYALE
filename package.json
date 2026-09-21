@@ -1,0 +1,28 @@
+{
+  "name": "riftbound-rivals",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Riftbound Rivals - a real-time 1v1 card battler with a server-authoritative simulation",
+  "workspaces": [
+    "shared",
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "build:shared": "npm run build -w @riftbound/shared",
+    "build": "npm run build:shared && npm run build -w @riftbound/server && npm run build -w @riftbound/client",
+    "dev:server": "npm run dev -w @riftbound/server",
+    "dev:client": "npm run dev -w @riftbound/client",
+    "dev": "npm run build:shared && concurrently -n server,client -c cyan,magenta \"npm run dev:server\" \"npm run dev:client\"",
+    "typecheck": "npm run build:shared && npm run typecheck -w @riftbound/server && npm run typecheck -w @riftbound/client",
+    "test": "npm run build:shared && npm run test -w @riftbound/shared",
+    "start": "npm run start -w @riftbound/server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

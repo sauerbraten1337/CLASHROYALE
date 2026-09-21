@@ -216,6 +216,25 @@ export function Battle({ createSession, settings, onFinished, onQuit }: BattlePr
     };
   }, []);
 
+  // --- Leaving the match --------------------------------------------------
+
+  /**
+   * Quitting an online match must concede it: the socket stays open when the
+   * player navigates away, so without an explicit forfeit the opponent would
+   * be left fighting an absent player until the match timed out.
+   */
+  const quit = useCallback(() => {
+    const current = sessionRef.current;
+    if (!current.isLocal) {
+      // eslint-disable-next-line no-alert
+      const confirmed = window.confirm('Leave the match? This counts as a loss.');
+      if (!confirmed) return;
+      current.forfeit();
+    }
+    audio.play(SoundEvent.UiBack);
+    onQuit();
+  }, [onQuit]);
+
   // --- Music --------------------------------------------------------------
 
   useEffect(() => {
@@ -415,7 +434,7 @@ export function Battle({ createSession, settings, onFinished, onQuit }: BattlePr
         timeRemaining={timeRemaining}
         phase={phase}
         opponentName={session.opponentName}
-        onQuit={onQuit}
+        onQuit={quit}
       />
 
       <div className="battle__arena">

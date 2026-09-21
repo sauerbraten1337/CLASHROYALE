@@ -132,6 +132,22 @@ export class Connection {
     };
   }
 
+  /**
+   * Re-sends identity after a rename.
+   *
+   * `connect()` returns early when the socket is already open, so calling it
+   * again would silently do nothing and the opponent would keep seeing the
+   * old name. This re-identifies in place instead.
+   */
+  identify(name: string): void {
+    this.playerName = name;
+    if (this.isConnected) {
+      this.send({ type: ClientMessageType.Hello, name, playerId: this.playerId });
+    } else {
+      this.connect(name, this.playerId);
+    }
+  }
+
   private scheduleReconnect(): void {
     if (this.reconnectTimer !== null) return;
     this.attempt++;

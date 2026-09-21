@@ -274,8 +274,8 @@ export function App(): JSX.Element {
 
   const rename = useCallback((name: string) => {
     setProfile((current) => ({ ...current, name }));
-    // Re-identify so the opponent sees the new name.
-    connectionRef.current?.connect(name, loadPlayerId());
+    // Re-identify on the existing socket so the opponent sees the new name.
+    connectionRef.current?.identify(name);
   }, []);
 
   const resetProgress = useCallback(() => {

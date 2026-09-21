@@ -69,19 +69,27 @@ export interface TowerLayout {
   projectileSpeed: number;
 }
 
+/**
+ * Tower combat values.
+ *
+ * These are balanced against the cheapest swarm in the set: three Shard
+ * Hounds (2 energy, ~370 combined dps) must come within a hair of taking a
+ * guard tower and fail, so an unanswered cheap push is genuinely threatening
+ * while any real defensive answer wins the exchange decisively.
+ */
 const GUARD_TOWER_BASE = {
-  health: 1450,
-  damage: 62,
-  attackSpeed: 0.8,
+  health: 1750,
+  damage: 130,
+  attackSpeed: 1.15,
   range: 26,
   radius: 5,
   projectileSpeed: 70,
 };
 
 const CORE_BASE = {
-  health: 2600,
-  damage: 76,
-  attackSpeed: 0.7,
+  health: 3150,
+  damage: 145,
+  attackSpeed: 1.05,
   range: 28,
   radius: 7,
   projectileSpeed: 70,

@@ -364,7 +364,9 @@ describe('robustness', () => {
   it('survives a long match with heavy random play without throwing', () => {
     const sim = makeSim();
     const playable = ['p1', 'p2'];
-    for (let i = 0; i < 30 * 200; i++) {
+    // Long enough to cover full regulation plus the whole sudden-death period,
+    // so the match is guaranteed to have resolved by the end of the loop.
+    for (let i = 0; i < 30 * 260; i++) {
       sim.step(1 / 30);
       if (sim.phase === MatchPhase.Finished) break;
       // Every half second, both sides try to dump a random card.

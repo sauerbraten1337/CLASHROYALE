@@ -13,7 +13,7 @@
     "build": "npm run build:shared && npm run build -w @riftbound/server && npm run build -w @riftbound/client",
     "dev:server": "npm run dev -w @riftbound/server",
     "dev:client": "npm run dev -w @riftbound/client",
-    "dev": "npm run build:shared && concurrently -n server,client -c cyan,magenta \"npm run dev:server\" \"npm run dev:client\"",
+    "dev": "npm run build:shared && npm run build -w @riftbound/server && concurrently -n shared,server,client -c gray,cyan,magenta \"npm run watch -w @riftbound/shared\" \"npm run dev:server\" \"npm run dev:client\"",
     "typecheck": "npm run build:shared && npm run typecheck -w @riftbound/server && npm run typecheck -w @riftbound/client",
     "test": "npm run build:shared && node --test \"shared/dist/__tests__/*.test.js\"",
     "start": "npm run start -w @riftbound/server",

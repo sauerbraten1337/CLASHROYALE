@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "dev": "node --watch --experimental-strip-types src/index.ts",
+    "dev": "concurrently -n tsc,node -c gray,green \"tsc -p tsconfig.json --watch --preserveWatchOutput\" \"node --watch dist/index.js\"",
     "start": "node dist/index.js",
     "test": "node --test \"dist/__tests__/*.test.js\""
   },
@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
-    "@types/ws": "^8.5.13"
+    "@types/ws": "^8.5.13",
+    "concurrently": "^9.1.0"
   }
 }
